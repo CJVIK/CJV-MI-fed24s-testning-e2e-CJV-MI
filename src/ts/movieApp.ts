@@ -1,7 +1,9 @@
+import { movieSort } from "./functions";
 import { IMovie } from "./models/Movie";
 import { getData } from "./services/movieService";
 
 let movies: IMovie[] = [];
+let sortDesc: boolean = true;
 
 export const init = () => {
   let form = document.getElementById("searchForm") as HTMLFormElement;
@@ -9,6 +11,22 @@ export const init = () => {
     e.preventDefault();
     handleSubmit();
   });
+  const sortButton = document.getElementById("sort-button") as HTMLButtonElement;
+  sortButton.addEventListener("click", toggleSort);
+};
+
+export const toggleSort = () => {
+  sortDesc = !sortDesc;
+
+  const sortButton = document.getElementById("sort-button") as HTMLButtonElement;
+  sortButton.textContent = sortDesc ? "Sortera A-Ö" : "Sortera Ö-A";
+
+
+  const sortedMovies = movieSort(movies, sortDesc);
+
+  const container = document.getElementById("movie-container") as HTMLDivElement;
+  container.innerHTML = "";
+  createHtml(sortedMovies, container);
 };
 
 export async function handleSubmit() {
@@ -20,18 +38,24 @@ export async function handleSubmit() {
   ) as HTMLDivElement;
   container.innerHTML = "";
 
+  const sortButton = document.getElementById("sort-button") as HTMLButtonElement;
+
   try {
     movies = await getData(searchText);
 
     if (movies.length > 0) {
+      sortButton.style.display = "block";
       createHtml(movies, container);
     } else {
+      sortButton.style.display = "none";
       displayNoResult(container);
     }
   } catch {
+    sortButton.style.display = "none";
     displayNoResult(container);
   }
 }
+
 
 export const createHtml = (movies: IMovie[], container: HTMLDivElement) => {
   for (let i = 0; i < movies.length; i++) {
