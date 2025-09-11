@@ -3,7 +3,7 @@ import { IMovie } from "./models/Movie";
 import { getData } from "./services/movieService";
 
 let movies: IMovie[] = [];
-let sortDesc: boolean = true;
+let sortDesc: boolean = false;
 
 export const init = () => {
   let form = document.getElementById("searchForm") as HTMLFormElement;
@@ -44,6 +44,10 @@ export async function handleSubmit() {
     movies = await getData(searchText);
 
     if (movies.length > 0) {
+      sortDesc = false;
+
+      movies = movieSort(movies, sortDesc);
+      sortButton.textContent = "Sortera Ö-A";
       sortButton.style.display = "block";
       createHtml(movies, container);
     } else {

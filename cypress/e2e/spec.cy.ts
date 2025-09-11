@@ -84,4 +84,46 @@ describe("Movie app tests", () => {
       cy.get(".movie img").should("exist");
     });
   });
+  describe("Sorting tests", () => {
+    beforeEach(() => {
+      cy.visit("/");
+    });
+    it("Should sort movies when clicking the sort button", () => {
+      // assign
+      cy.get("#searchText").should("exist");
+      cy.get("#movie-container").should("exist").and("be.empty");
+      cy.get("#searchText").type("Lord of the Rings");
+
+      // act
+      cy.get("#search").click();
+
+      // assert
+      cy.get(".movie", { timeout: 10000 }).should("exist");
+      cy.get("#sort-button").should("exist").and("have.text", "Sortera Ö-A");
+
+      // Store movie titles before sorting (A till Ö initialt)
+      cy.get(".movie h3").then(($titles) => {
+        const titlesBefore = Array.from($titles, (el) => el.innerText);
+
+        //verify initial sort order is A to Ö
+        const sortedAscending = [...titlesBefore].sort();
+        expect(titlesBefore).to.deep.equal(sortedAscending);
+
+        //act - click sort button
+        cy.get("#sort-button").click();
+
+        // assert - button text changed
+        cy.get("#sort-button").should("have.text", "Sortera A-Ö");
+
+        // assert - movies are now sorted from Ö to A
+        cy.get(".movie h3").then($sortedTitles => {
+          const titlesAfter = Array.from($sortedTitles).map(el => el.innerText);
+
+          // verify sort is now Ö to A
+          const sortedDescending = [...titlesBefore].sort().reverse();
+          expect(titlesAfter).to.deep.equal(sortedDescending);
+        });
+      });
+    });
+  });
 });
